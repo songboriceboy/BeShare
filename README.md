@@ -1,5 +1,5 @@
 # BeShare
-a open source web project by using every develop skills(android, ios, php, .net, mysql, web)
+a open source web project by using every develop skills(android, ios, php, .net, mysql, front-end)
 
 
 该项目计划用到以下编程技术：
