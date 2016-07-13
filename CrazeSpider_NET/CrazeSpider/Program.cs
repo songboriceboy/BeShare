@@ -26,7 +26,9 @@ namespace CrazeSpider
     }
     class Program
     {
-        private static CRDB.BLL.crdb_rsssource bll = new CRDB.BLL.crdb_rsssource();
+        private static CRDB.BLL.crdb_rsssource m_bll = new CRDB.BLL.crdb_rsssource();
+        private static System.Timers.Timer m_timerGetLinks = new System.Timers.Timer();
+        private static System.Timers.Timer m_timerGetArticle = new System.Timers.Timer(); 
         private static HtmlAgilityPack.HtmlDocument GetHtmlDocument(string strPage)
         {
             HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument
@@ -209,9 +211,27 @@ namespace CrazeSpider
             }
         }
 
+
+        public static void timerGetLinks_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            Console.WriteLine("timerGetLinks_Elapsed");
+        }
+        public static void timerGetArticle_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            Console.WriteLine("timerGetArticle_Elapsed");
+        } 
+
         static void Main(string[] args)
         {
-            DataSet ds = bll.GetAllList();
+            m_timerGetLinks.Interval = 20000;
+            m_timerGetLinks.Enabled = true;
+            m_timerGetLinks.Elapsed += new System.Timers.ElapsedEventHandler(timerGetLinks_Elapsed);
+
+            m_timerGetArticle.Interval = 30000;
+            m_timerGetArticle.Enabled = true;
+            m_timerGetArticle.Elapsed += new System.Timers.ElapsedEventHandler(timerGetArticle_Elapsed); 
+           
+            DataSet ds = m_bll.GetAllList();
             RssSource rs = new RssSource();
             rs.strSiteUrl = "http://www.cnblogs.com/";
             rs.strArticleUrlPattern = "www.cnblogs.com/*/p/*.html$";
