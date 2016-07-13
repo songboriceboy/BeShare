@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using Fizzler;
 using Fizzler.Systems.HtmlAgilityPack;
+using System.Data;
+
 
 namespace CrazeSpider
 {
@@ -24,7 +26,7 @@ namespace CrazeSpider
     }
     class Program
     {
-
+        private static CRDB.BLL.crdb_rsssource bll = new CRDB.BLL.crdb_rsssource();
         private static HtmlAgilityPack.HtmlDocument GetHtmlDocument(string strPage)
         {
             HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument
@@ -209,6 +211,7 @@ namespace CrazeSpider
 
         static void Main(string[] args)
         {
+            DataSet ds = bll.GetAllList();
             RssSource rs = new RssSource();
             rs.strSiteUrl = "http://www.cnblogs.com/";
             rs.strArticleUrlPattern = "www.cnblogs.com/*/p/*.html$";
