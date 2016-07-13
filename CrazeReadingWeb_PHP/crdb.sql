@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS `crdb_rsssource` (
   `article_url_pattern` varchar(200) NOT NULL DEFAULT '' COMMENT '文章地址模式',
   `article_url_range` varchar(64) NOT NULL DEFAULT '' COMMENT '文章地址范围',
   `gather_interval` int(10) NOT NULL DEFAULT 0 COMMENT '采集时间间隔，单位秒',
-  `last_visit_time` int(10) NOT NULL DEFAULT 0 COMMENT '上次访问时间',
   PRIMARY KEY (`id`)  
 ) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8;
 
