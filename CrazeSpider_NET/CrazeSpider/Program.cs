@@ -8,6 +8,9 @@ using Fizzler;
 using Fizzler.Systems.HtmlAgilityPack;
 using System.Data;
 using System.Net;
+using System.IO;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 
 namespace CrazeSpider
@@ -27,7 +30,7 @@ namespace CrazeSpider
     }
     class Program
     {
-       
+        private static string strApiUrl = "http://localhost:808";
         private static System.Timers.Timer m_timerGetLinks = new System.Timers.Timer();
         private static System.Timers.Timer m_timerGetArticle = new System.Timers.Timer(); 
         private static HtmlAgilityPack.HtmlDocument GetHtmlDocument(string strPage)
@@ -116,80 +119,80 @@ namespace CrazeSpider
             return;
 
         }
-        //private static void GetSiteLinks(CRDB.Model.crdb_rsssource model, string strContent)
-        //{
-        //    string strUrlRule = model.article_url_pattern; ;
-        //    strUrlRule = strUrlRule.Replace(".", "\\.");
-        //    strUrlRule = strUrlRule.Replace("*", ".*?");
-            
-        //    HtmlAgilityPack.HtmlDocument htmlDoc = GetHtmlDocument(strContent);
+        private static void GetSiteLinks(RssSource rs, string strContent)
+        {
+            string strUrlRule = rs.strArticleUrlPattern;
+            strUrlRule = strUrlRule.Replace(".", "\\.");
+            strUrlRule = strUrlRule.Replace("*", ".*?");
 
-        //    if (model.article_url_range != "")
-        //    {
-        //        IEnumerable<HtmlNode> NodesUrlContent = htmlDoc.DocumentNode.QuerySelectorAll(model.article_url_range);
-        //        if (NodesUrlContent.Count() > 0)
-        //        {
-        //            string strReturnPage = NodesUrlContent.ToArray()[0].InnerHtml;//进一步缩小范围
-        //            htmlDoc = GetHtmlDocument(strReturnPage);
-        //        }
-        //    }
+            HtmlAgilityPack.HtmlDocument htmlDoc = GetHtmlDocument(strContent);
 
-        //    string baseUrl = GetUrlLeftPart(model.site_url);
-        //    DocumentWithLinks links = htmlDoc.GetLinks();
+            if (rs.strArticleUrlRangeCssPath != "")
+            {
+                IEnumerable<HtmlNode> NodesUrlContent = htmlDoc.DocumentNode.QuerySelectorAll(rs.strArticleUrlRangeCssPath);
+                if (NodesUrlContent.Count() > 0)
+                {
+                    string strReturnPage = NodesUrlContent.ToArray()[0].InnerHtml;//进一步缩小范围
+                    htmlDoc = GetHtmlDocument(strReturnPage);
+                }
+            }
 
-  
+            string baseUrl = GetUrlLeftPart(rs.strSiteUrl);
+            DocumentWithLinks links = htmlDoc.GetLinks();
 
 
-        //    foreach (string link in links.Links.Union(links.References))
-        //    {
-
-        //        if (string.IsNullOrEmpty(link))
-        //        {
-        //            continue;
-        //        }
 
 
-        //        string decodedLink = link;
+            foreach (string link in links.Links.Union(links.References))
+            {
 
-        //        string normalizedLink = GetNormalizedLink(baseUrl, decodedLink);
+                if (string.IsNullOrEmpty(link))
+                {
+                    continue;
+                }
 
 
-        //        if (string.IsNullOrEmpty(normalizedLink))
-        //        {
-        //            continue;
-        //        }
+                string decodedLink = link;
 
-        //        MatchCollection matchs = Regex.Matches(normalizedLink, strUrlRule, RegexOptions.Singleline);
-        //        if (matchs.Count > 0)
-        //        {
-        //            string strLinkText = "";
+                string normalizedLink = GetNormalizedLink(baseUrl, decodedLink);
 
-        //            foreach (string strTemp in links.m_dicLink2Text.Keys)
-        //            {
-        //                if (strTemp.Contains(normalizedLink))
-        //                {
-        //                    strLinkText = links.m_dicLink2Text[strTemp];
-        //                    break;
-        //                }
-        //            }
 
-        //            if (strLinkText == "")
-        //            {
-        //                if (links.m_dicLink2Text.Keys.Contains(link))
-        //                    strLinkText = links.m_dicLink2Text[link].TrimEnd().TrimStart();
-        //                if (links.m_dicLink2Text.Keys.Contains(link.ToLower()))
-        //                    strLinkText = links.m_dicLink2Text[link.ToLower()].TrimEnd().TrimStart();
-        //            }
-        //            SaveUrlToDB(normalizedLink, strLinkText);
-        //            Console.WriteLine(normalizedLink);
-      
+                if (string.IsNullOrEmpty(normalizedLink))
+                {
+                    continue;
+                }
 
-        //        }
+                MatchCollection matchs = Regex.Matches(normalizedLink, strUrlRule, RegexOptions.Singleline);
+                if (matchs.Count > 0)
+                {
+                    string strLinkText = "";
 
-        //    }
-        //    return;
+                    foreach (string strTemp in links.m_dicLink2Text.Keys)
+                    {
+                        if (strTemp.Contains(normalizedLink))
+                        {
+                            strLinkText = links.m_dicLink2Text[strTemp];
+                            break;
+                        }
+                    }
 
-        //}
+                    if (strLinkText == "")
+                    {
+                        if (links.m_dicLink2Text.Keys.Contains(link))
+                            strLinkText = links.m_dicLink2Text[link].TrimEnd().TrimStart();
+                        if (links.m_dicLink2Text.Keys.Contains(link.ToLower()))
+                            strLinkText = links.m_dicLink2Text[link.ToLower()].TrimEnd().TrimStart();
+                    }
+                    SaveUrlToDB(normalizedLink, strLinkText);
+                    Console.WriteLine(normalizedLink);
+
+
+                }
+
+            }
+            return;
+
+        }
 
         protected static string GetPageContent(string strMainContentElementRules, string strReturnPage)
         {
@@ -260,16 +263,45 @@ namespace CrazeSpider
                 return source;
             }
         }
+        public static RssSource GetOneTask()
+        {
+            string loginUrl = strApiUrl + "/index.php/api/index/get_one_task";
 
+            RssSource rs = new RssSource();
+            Encoding encoding = Encoding.GetEncoding("utf-8");
+
+            IDictionary<string, string> parameters = new Dictionary<string, string>();
+       
+
+            HttpWebResponse response = HttpWebResponseUtility.CreatePostHttpResponse(loginUrl, parameters, null, null, encoding, null);
+            StreamReader reader = new StreamReader(response.GetResponseStream(), encoding);
+
+
+
+            string result = reader.ReadToEnd();
+            JObject jo = JObject.Parse(result);
+            string[] values = jo.Properties().Select(item => item.Value.ToString()).ToArray();
+            JArray ja = (JArray)JsonConvert.DeserializeObject(values[3]);
+            foreach (JToken jt in ja)
+            {
+                rs.strSiteName = jt["site_name"].ToString();
+                rs.strSiteCode = jt["site_code"].ToString();
+                rs.strSiteUrl = jt["site_url"].ToString();
+                rs.strArticleUrlPattern = jt["article_url_pattern"].ToString();
+                rs.strArticleUrlRangeCssPath = jt["article_url_range"].ToString();
+            }
+
+            return rs;
+            //Console.WriteLine("timerGetLinks_Elapsed");
+        }
 
         public static void timerGetLinks_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            //CRDB.BLL.crdb_rsssource m_bll = new CRDB.BLL.crdb_rsssource();
-            //CRDB.Model.crdb_rsssource model = m_bll.GetOneTask("");
+            RssSource rs = GetOneTask();
             WebDownloader wd = new WebDownloader();
             Encoding ec = Encoding.GetEncoding("UTF-8");
-            //string strContent = wd.GetPageByHttpWebRequest(model.site_url, ec, "");
-            //GetSiteLinks(model, strContent);
+            string strContent = wd.GetPageByHttpWebRequest(rs.strSiteUrl, ec, "");
+            GetSiteLinks(rs, strContent);
 
             Console.WriteLine("timerGetLinks_Elapsed");
         }
@@ -280,21 +312,17 @@ namespace CrazeSpider
         
         static void Main(string[] args)
         {
-  
-            //CRDB.Model.crdb_rsssource model = m_bll.GetOneTask("");
-            //model.site_name = "大的";
-            //model.gather_interval = 28;
-            //m_bll.Update(model);
-            //return;
-            //m_timerGetLinks.Interval = 20000;
-            //m_timerGetLinks.Enabled = true;
-            //m_timerGetLinks.Elapsed += new System.Timers.ElapsedEventHandler(timerGetLinks_Elapsed);
+            //GetOneTask();
+
+            m_timerGetLinks.Interval = 5000;
+            m_timerGetLinks.Enabled = true;
+            m_timerGetLinks.Elapsed += new System.Timers.ElapsedEventHandler(timerGetLinks_Elapsed);
 
             //m_timerGetArticle.Interval = 30000;
             //m_timerGetArticle.Enabled = true;
             //m_timerGetArticle.Elapsed += new System.Timers.ElapsedEventHandler(timerGetArticle_Elapsed); 
-           
-    
+
+            Console.ReadLine();
             //RssSource rs = new RssSource();
             //rs.strSiteUrl = "http://www.cnblogs.com/";
             //rs.strArticleUrlPattern = "www.cnblogs.com/*/p/*.html$";
