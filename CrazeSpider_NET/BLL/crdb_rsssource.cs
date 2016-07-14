@@ -88,7 +88,10 @@ namespace CRDB.BLL
 			}
 			return (CRDB.Model.crdb_rsssource)objModel;
 		}
-
+        public CRDB.Model.crdb_rsssource GetOneTask(string strWhere)
+        {
+            return dal.GetOneTask(strWhere);
+        }
 		/// <summary>
 		/// 获得数据列表
 		/// </summary>
