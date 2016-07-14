@@ -23,6 +23,11 @@ namespace CrazeSpider
         public string strArticleUrlPattern;
         public string strArticleUrlRangeCssPath;
     }
+    public class Link_To_Get
+    {
+        public int nID;
+        public string strSiteUrl;
+    }
     public class ContentGatherRule
     {
         public string strArticleUrlPattern;
@@ -357,6 +362,36 @@ namespace CrazeSpider
             return;
             //Console.WriteLine("timerGetLinks_Elapsed");
         }
+
+        public static Link_To_Get GetOneLinkToGet()
+        {
+            string loginUrl = strApiUrl + "/index.php/api/index/get_one_link";
+
+            Link_To_Get rs = new Link_To_Get();
+            Encoding encoding = Encoding.GetEncoding("utf-8");
+
+            IDictionary<string, string> parameters = new Dictionary<string, string>();
+       
+
+            HttpWebResponse response = HttpWebResponseUtility.CreatePostHttpResponse(loginUrl, parameters, null, null, encoding, null);
+            StreamReader reader = new StreamReader(response.GetResponseStream(), encoding);
+
+
+
+            string result = reader.ReadToEnd();
+            JObject jo = JObject.Parse(result);
+            string[] values = jo.Properties().Select(item => item.Value.ToString()).ToArray();
+            JArray ja = (JArray)JsonConvert.DeserializeObject(values[3]);
+            foreach (JToken jt in ja)
+            {
+                rs.nID = int.Parse(jt["id"].ToString());
+                rs.strSiteUrl = jt["article_link"].ToString();
+  
+            }
+
+            return rs;
+            //Console.WriteLine("timerGetLinks_Elapsed");
+        }
         public static RssSource GetOneTask()
         {
             string loginUrl = strApiUrl + "/index.php/api/index/get_one_task";
@@ -401,6 +436,59 @@ namespace CrazeSpider
         }
         public static void timerGetArticle_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            Link_To_Get rs = GetOneLinkToGet();
+
+
+            WebDownloader wd = new WebDownloader();
+            Encoding ec = Encoding.GetEncoding("UTF-8");
+            //string strContent = wd.GetPageByHttpWebRequest(rs.strSiteUrl, ec, "");
+            //GetSiteLinks(rs, strContent);
+
+            ContentGatherRule cgr = new ContentGatherRule();
+            bool bFind = false;
+            string strUrlRuleFind = "";
+            foreach(string strTemp in m_dicSiteRules.Keys)
+            {
+                string strUrlRule = strTemp;
+                strUrlRule = strUrlRule.Replace(".", "\\.");
+                strUrlRule = strUrlRule.Replace("*", ".*?");
+                MatchCollection matchs = Regex.Matches(rs.strSiteUrl, strUrlRule, RegexOptions.Singleline);
+                if(matchs.Count > 0)
+                {
+                    bFind = true;
+                    strUrlRuleFind = strTemp;
+                    break;
+                }
+            }
+
+            if (!bFind)
+                return;
+            else
+            {
+                cgr.strArticleContentCssPath = m_dicSiteRules[strUrlRuleFind];
+            
+            }
+
+
+
+            string strArticle = wd.GetPageByHttpWebRequest(rs.strSiteUrl, ec, "");
+
+
+          
+            strArticle = GetPageContent(cgr.strArticleContentCssPath, strArticle);
+            string strUpdateContentUrl = strApiUrl + "/index.php/api/index/update_article_content";
+
+
+            Encoding encoding = Encoding.GetEncoding("utf-8");
+
+            IDictionary<string, string> parameters = new Dictionary<string, string>();
+            strArticle = System.Web.HttpUtility.HtmlDecode(strArticle);
+            parameters.Add("id", rs.nID.ToString());
+            parameters.Add("content", strArticle);
+            //parameters.Add("password", password);
+
+            HttpWebResponse response = HttpWebResponseUtility.CreatePostHttpResponse(strUpdateContentUrl, parameters, null, null, encoding, null);
+       
             Console.WriteLine("timerGetArticle_Elapsed");
         } 
         
@@ -413,9 +501,9 @@ namespace CrazeSpider
             m_timerGetLinks.Enabled = true;
             m_timerGetLinks.Elapsed += new System.Timers.ElapsedEventHandler(timerGetLinks_Elapsed);
 
-            //m_timerGetArticle.Interval = 30000;
-            //m_timerGetArticle.Enabled = true;
-            //m_timerGetArticle.Elapsed += new System.Timers.ElapsedEventHandler(timerGetArticle_Elapsed); 
+            m_timerGetArticle.Interval = 10000;
+            m_timerGetArticle.Enabled = true;
+            m_timerGetArticle.Elapsed += new System.Timers.ElapsedEventHandler(timerGetArticle_Elapsed); 
 
             Console.ReadLine();
             //RssSource rs = new RssSource();
