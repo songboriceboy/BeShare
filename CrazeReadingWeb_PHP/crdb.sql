@@ -30,8 +30,13 @@ CREATE TABLE IF NOT EXISTS `crdb_article` (
   `article_title` varchar(200) NOT NULL DEFAULT '' COMMENT '文章标题',
   `article_content` text NOT NULL DEFAULT '' COMMENT '文章内容',
   `article_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '文章日期',
+  `bloom_offset1` int(32) unsigned NOT NULL DEFAULT '0' COMMENT '去重偏移',
+  `bloom_offset2` int(32) unsigned NOT NULL DEFAULT '0' COMMENT '去重偏移',
   PRIMARY KEY (`id`)  
 ) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8;
 
 INSERT INTO `crdb_rsssource` (`site_name`, `site_code`, `site_url`, `article_url_pattern`, `article_url_range`, `gather_interval`) VALUES
 ('博客园首页', 'utf-8', 'http://www.cnblogs.com/', 'http://www.cnblogs.com/*/p/*.html$', 'div#post_list','10')
+
+INSERT INTO `crdb_urlrule` (`article_url_pattern`, `article_content_csspath`) VALUES
+('http://www.cnblogs.com/*/p/*.html$', 'div#cnblogs_post_body')
