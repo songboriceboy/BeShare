@@ -15,6 +15,8 @@ namespace CRDB.Model
 		private string _article_title;
 		private string _article_content;
 		private int _article_time;
+		private int _bloom_offset1;
+		private int _bloom_offset2;
 		/// <summary>
 		/// auto_increment
 		/// </summary>
@@ -54,6 +56,22 @@ namespace CRDB.Model
 		{
 			set{ _article_time=value;}
 			get{return _article_time;}
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		public int bloom_offset1
+		{
+			set{ _bloom_offset1=value;}
+			get{return _bloom_offset1;}
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		public int bloom_offset2
+		{
+			set{ _bloom_offset2=value;}
+			get{return _bloom_offset2;}
 		}
 		#endregion Model
 
