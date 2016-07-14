@@ -1,156 +1,80 @@
 using System;
-using System.Data;
-using System.Collections.Generic;
-using LTP.Common;
-using CRDB.Model;
-namespace CRDB.BLL
+namespace CRDB.Model
 {
 	/// <summary>
-	/// 业务逻辑类crdb_article 的摘要说明。
+	/// 实体类crdb_article 。(属性说明自动提取数据库字段的描述信息)
 	/// </summary>
+	[Serializable]
 	public class crdb_article
 	{
-		private readonly CRDB.DAL.crdb_article dal=new CRDB.DAL.crdb_article();
 		public crdb_article()
 		{}
-		#region  成员方法
-
+		#region Model
+		private int _id;
+		private string _article_link;
+		private string _article_title;
+		private string _article_content;
+		private int _article_time;
+		private int _bloom_offset1;
+		private int _bloom_offset2;
 		/// <summary>
-		/// 得到最大ID
+		/// auto_increment
 		/// </summary>
-		public int GetMaxId()
+		public int id
 		{
-			return dal.GetMaxId();
-		}
-
-		/// <summary>
-		/// 是否存在该记录
-		/// </summary>
-		public bool Exists(int id)
-		{
-			return dal.Exists(id);
-		}
-
-		/// <summary>
-		/// 增加一条数据
-		/// </summary>
-		public void Add(CRDB.Model.crdb_article model)
-		{
-			dal.Add(model);
-		}
-
-		/// <summary>
-		/// 更新一条数据
-		/// </summary>
-		public void Update(CRDB.Model.crdb_article model)
-		{
-			dal.Update(model);
-		}
-
-		/// <summary>
-		/// 删除一条数据
-		/// </summary>
-		public void Delete(int id)
-		{
-			
-			dal.Delete(id);
-		}
-
-		/// <summary>
-		/// 得到一个对象实体
-		/// </summary>
-		public CRDB.Model.crdb_article GetModel(int id)
-		{
-			
-			return dal.GetModel(id);
-		}
-
-		/// <summary>
-		/// 得到一个对象实体，从缓存中。
-		/// </summary>
-		public CRDB.Model.crdb_article GetModelByCache(int id)
-		{
-			
-			string CacheKey = "crdb_articleModel-" + id;
-			object objModel = LTP.Common.DataCache.GetCache(CacheKey);
-			if (objModel == null)
-			{
-				try
-				{
-					objModel = dal.GetModel(id);
-					if (objModel != null)
-					{
-						int ModelCache = LTP.Common.ConfigHelper.GetConfigInt("ModelCache");
-						LTP.Common.DataCache.SetCache(CacheKey, objModel, DateTime.Now.AddMinutes(ModelCache), TimeSpan.Zero);
-					}
-				}
-				catch{}
-			}
-			return (CRDB.Model.crdb_article)objModel;
-		}
-
-		/// <summary>
-		/// 获得数据列表
-		/// </summary>
-		public DataSet GetList(string strWhere)
-		{
-			return dal.GetList(strWhere);
+			set{ _id=value;}
+			get{return _id;}
 		}
 		/// <summary>
-		/// 获得数据列表
+		/// 
 		/// </summary>
-		public List<CRDB.Model.crdb_article> GetModelList(string strWhere)
+		public string article_link
 		{
-			DataSet ds = dal.GetList(strWhere);
-			return DataTableToList(ds.Tables[0]);
+			set{ _article_link=value;}
+			get{return _article_link;}
 		}
 		/// <summary>
-		/// 获得数据列表
+		/// 
 		/// </summary>
-		public List<CRDB.Model.crdb_article> DataTableToList(DataTable dt)
+		public string article_title
 		{
-			List<CRDB.Model.crdb_article> modelList = new List<CRDB.Model.crdb_article>();
-			int rowsCount = dt.Rows.Count;
-			if (rowsCount > 0)
-			{
-				CRDB.Model.crdb_article model;
-				for (int n = 0; n < rowsCount; n++)
-				{
-					model = new CRDB.Model.crdb_article();
-					if(dt.Rows[n]["id"].ToString()!="")
-					{
-						model.id=int.Parse(dt.Rows[n]["id"].ToString());
-					}
-					model.article_link=dt.Rows[n]["article_link"].ToString();
-					model.article_title=dt.Rows[n]["article_title"].ToString();
-					model.article_content=dt.Rows[n]["article_content"].ToString();
-					if(dt.Rows[n]["article_time"].ToString()!="")
-					{
-						model.article_time=int.Parse(dt.Rows[n]["article_time"].ToString());
-					}
-					modelList.Add(model);
-				}
-			}
-			return modelList;
+			set{ _article_title=value;}
+			get{return _article_title;}
 		}
-
 		/// <summary>
-		/// 获得数据列表
+		/// 
 		/// </summary>
-		public DataSet GetAllList()
+		public string article_content
 		{
-			return GetList("");
+			set{ _article_content=value;}
+			get{return _article_content;}
 		}
-
 		/// <summary>
-		/// 获得数据列表
+		/// 
 		/// </summary>
-		//public DataSet GetList(int PageSize,int PageIndex,string strWhere)
-		//{
-			//return dal.GetList(PageSize,PageIndex,strWhere);
-		//}
+		public int article_time
+		{
+			set{ _article_time=value;}
+			get{return _article_time;}
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		public int bloom_offset1
+		{
+			set{ _bloom_offset1=value;}
+			get{return _bloom_offset1;}
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		public int bloom_offset2
+		{
+			set{ _bloom_offset2=value;}
+			get{return _bloom_offset2;}
+		}
+		#endregion Model
 
-		#endregion  成员方法
 	}
 }
 
