@@ -7,6 +7,7 @@ using HtmlAgilityPack;
 using Fizzler;
 using Fizzler.Systems.HtmlAgilityPack;
 using System.Data;
+using System.Net;
 
 
 namespace CrazeSpider
@@ -26,7 +27,7 @@ namespace CrazeSpider
     }
     class Program
     {
-
+        static CRDB.BLL.crdb_rsssource m_bll = new CRDB.BLL.crdb_rsssource();
         private static System.Timers.Timer m_timerGetLinks = new System.Timers.Timer();
         private static System.Timers.Timer m_timerGetArticle = new System.Timers.Timer(); 
         private static HtmlAgilityPack.HtmlDocument GetHtmlDocument(string strPage)
@@ -89,7 +90,7 @@ namespace CrazeSpider
             modelArticle.article_content = "";
             modelArticle.article_time = int.Parse(GenerateTimeStamp(System.DateTime.Now));
            
-            modelArticle.article_link = strUrl;
+            modelArticle.article_link = "";
     
             string strTitle = "";
             if (!string.IsNullOrEmpty(strLinkText))
@@ -279,13 +280,19 @@ namespace CrazeSpider
         
         static void Main(string[] args)
         {
-            m_timerGetLinks.Interval = 20000;
-            m_timerGetLinks.Enabled = true;
-            m_timerGetLinks.Elapsed += new System.Timers.ElapsedEventHandler(timerGetLinks_Elapsed);
+  
+            //CRDB.Model.crdb_rsssource model = m_bll.GetOneTask("");
+            //model.site_name = "大的";
+            //model.gather_interval = 28;
+            //m_bll.Update(model);
+            //return;
+            //m_timerGetLinks.Interval = 20000;
+            //m_timerGetLinks.Enabled = true;
+            //m_timerGetLinks.Elapsed += new System.Timers.ElapsedEventHandler(timerGetLinks_Elapsed);
 
-            m_timerGetArticle.Interval = 30000;
-            m_timerGetArticle.Enabled = true;
-            m_timerGetArticle.Elapsed += new System.Timers.ElapsedEventHandler(timerGetArticle_Elapsed); 
+            //m_timerGetArticle.Interval = 30000;
+            //m_timerGetArticle.Enabled = true;
+            //m_timerGetArticle.Elapsed += new System.Timers.ElapsedEventHandler(timerGetArticle_Elapsed); 
            
     
             //RssSource rs = new RssSource();
@@ -317,7 +324,17 @@ namespace CrazeSpider
 
             Console.WriteLine("--------------正文-----------------------");
             strArticle = GetPageContent(cgr.strArticleContentCssPath, strArticle);
- 
+            string loginUrl = "http://localhost:808/index.php/api/index/user_login";
+            
+
+            Encoding encoding = Encoding.GetEncoding("utf-8");
+
+            IDictionary<string, string> parameters = new Dictionary<string, string>();
+            strArticle = System.Web.HttpUtility.HtmlDecode(strArticle);
+            parameters.Add("content", strArticle);
+            //parameters.Add("password", password);
+
+            HttpWebResponse response = HttpWebResponseUtility.CreatePostHttpResponse(loginUrl, parameters, null, null, encoding, null);
             Console.ReadLine();
         }
     }
