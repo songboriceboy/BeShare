@@ -506,47 +506,7 @@ namespace CrazeSpider
             m_timerGetArticle.Elapsed += new System.Timers.ElapsedEventHandler(timerGetArticle_Elapsed); 
 
             Console.ReadLine();
-            //RssSource rs = new RssSource();
-            //rs.strSiteUrl = "http://www.cnblogs.com/";
-            //rs.strArticleUrlPattern = "www.cnblogs.com/*/p/*.html$";
-            //rs.strArticleUrlRangeCssPath = "div#post_list";
           
-            WebDownloader wd = new WebDownloader();
-            Encoding ec = Encoding.GetEncoding("UTF-8");
-            //string strContent = wd.GetPageByHttpWebRequest(rs.strSiteUrl, ec, "");
-            //GetSiteLinks(rs, strContent);
-
-
-            ContentGatherRule cgr = new ContentGatherRule();
-            cgr.strArticleContentCssPath = "div#cnblogs_post_body";
-            cgr.strArticleUrlPattern = "www.cnblogs.com/*/p/*.html$";
-    
-            string strUrlArticle = "http://www.cnblogs.com/chejiangyi/p/5666250.html";
-
-
-            //string strUrlRule = cgr.strArticleUrlPattern; ;
-            //strUrlRule = strUrlRule.Replace(".", "\\.");
-            //strUrlRule = strUrlRule.Replace("*", ".*?");
-            //MatchCollection matchs = Regex.Matches(strUrlArticle, strUrlRule, RegexOptions.Singleline);
-            //int nMatchCount = matchs.Count;
-
-            string strArticle = wd.GetPageByHttpWebRequest(strUrlArticle, ec, "");
-         
-
-            Console.WriteLine("--------------正文-----------------------");
-            strArticle = GetPageContent(cgr.strArticleContentCssPath, strArticle);
-            string loginUrl = "http://localhost:808/index.php/api/index/user_login";
-            
-
-            Encoding encoding = Encoding.GetEncoding("utf-8");
-
-            IDictionary<string, string> parameters = new Dictionary<string, string>();
-            strArticle = System.Web.HttpUtility.HtmlDecode(strArticle);
-            parameters.Add("content", strArticle);
-            //parameters.Add("password", password);
-
-            HttpWebResponse response = HttpWebResponseUtility.CreatePostHttpResponse(loginUrl, parameters, null, null, encoding, null);
-            Console.ReadLine();
         }
     }
 }
