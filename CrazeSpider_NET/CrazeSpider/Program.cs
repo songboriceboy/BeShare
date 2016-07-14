@@ -460,7 +460,7 @@ namespace CrazeSpider
                     break;
                 }
             }
-
+            //这里要向服务器报告已经处理过，数据表需要增加字段
             if (!bFind)
                 return;
             else
