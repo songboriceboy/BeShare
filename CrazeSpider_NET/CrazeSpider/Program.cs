@@ -409,7 +409,7 @@ namespace CrazeSpider
             //GetOneTask();
             GetAllRules();
 
-            m_timerGetLinks.Interval = 5000;
+            m_timerGetLinks.Interval = 20000;
             m_timerGetLinks.Enabled = true;
             m_timerGetLinks.Elapsed += new System.Timers.ElapsedEventHandler(timerGetLinks_Elapsed);
 
