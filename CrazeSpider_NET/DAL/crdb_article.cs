@@ -45,18 +45,22 @@ namespace CRDB.DAL
 		{
 			StringBuilder strSql=new StringBuilder();
 			strSql.Append("insert into crdb_article(");
-			strSql.Append("article_link,article_title,article_content,article_time)");
+			strSql.Append("article_link,article_title,article_content,article_time,bloom_offset1,bloom_offset2)");
 			strSql.Append(" values (");
-			strSql.Append("@article_link,@article_title,@article_content,@article_time)");
+			strSql.Append("@article_link,@article_title,@article_content,@article_time,@bloom_offset1,@bloom_offset2)");
 			MySqlParameter[] parameters = {
 					new MySqlParameter("@article_link", MySqlDbType.VarChar,200),
 					new MySqlParameter("@article_title", MySqlDbType.VarChar,200),
 					new MySqlParameter("@article_content", MySqlDbType.Text),
-					new MySqlParameter("@article_time", MySqlDbType.Int32,10)};
+					new MySqlParameter("@article_time", MySqlDbType.Int32,10),
+					new MySqlParameter("@bloom_offset1", MySqlDbType.Int32,32),
+					new MySqlParameter("@bloom_offset2", MySqlDbType.Int32,32)};
 			parameters[0].Value = model.article_link;
 			parameters[1].Value = model.article_title;
 			parameters[2].Value = model.article_content;
 			parameters[3].Value = model.article_time;
+			parameters[4].Value = model.bloom_offset1;
+			parameters[5].Value = model.bloom_offset2;
 
 			DbHelperMySQL.ExecuteSql(strSql.ToString(),parameters);
 		}
@@ -70,19 +74,25 @@ namespace CRDB.DAL
 			strSql.Append("article_link=@article_link,");
 			strSql.Append("article_title=@article_title,");
 			strSql.Append("article_content=@article_content,");
-			strSql.Append("article_time=@article_time");
+			strSql.Append("article_time=@article_time,");
+			strSql.Append("bloom_offset1=@bloom_offset1,");
+			strSql.Append("bloom_offset2=@bloom_offset2");
 			strSql.Append(" where id=@id ");
 			MySqlParameter[] parameters = {
 					new MySqlParameter("@id", MySqlDbType.Int32,11),
 					new MySqlParameter("@article_link", MySqlDbType.VarChar,200),
 					new MySqlParameter("@article_title", MySqlDbType.VarChar,200),
 					new MySqlParameter("@article_content", MySqlDbType.Text),
-					new MySqlParameter("@article_time", MySqlDbType.Int32,10)};
+					new MySqlParameter("@article_time", MySqlDbType.Int32,10),
+					new MySqlParameter("@bloom_offset1", MySqlDbType.Int32,32),
+					new MySqlParameter("@bloom_offset2", MySqlDbType.Int32,32)};
 			parameters[0].Value = model.id;
 			parameters[1].Value = model.article_link;
 			parameters[2].Value = model.article_title;
 			parameters[3].Value = model.article_content;
 			parameters[4].Value = model.article_time;
+			parameters[5].Value = model.bloom_offset1;
+			parameters[6].Value = model.bloom_offset2;
 
 			DbHelperMySQL.ExecuteSql(strSql.ToString(),parameters);
 		}
@@ -111,7 +121,7 @@ namespace CRDB.DAL
 		{
 			
 			StringBuilder strSql=new StringBuilder();
-			strSql.Append("select id,article_link,article_title,article_content,article_time from crdb_article ");
+			strSql.Append("select id,article_link,article_title,article_content,article_time,bloom_offset1,bloom_offset2 from crdb_article ");
 			strSql.Append(" where id=@id ");
 			MySqlParameter[] parameters = {
 					new MySqlParameter("@id", MySqlDbType.Int32)};
@@ -132,6 +142,14 @@ namespace CRDB.DAL
 				{
 					model.article_time=int.Parse(ds.Tables[0].Rows[0]["article_time"].ToString());
 				}
+				if(ds.Tables[0].Rows[0]["bloom_offset1"].ToString()!="")
+				{
+					model.bloom_offset1=int.Parse(ds.Tables[0].Rows[0]["bloom_offset1"].ToString());
+				}
+				if(ds.Tables[0].Rows[0]["bloom_offset2"].ToString()!="")
+				{
+					model.bloom_offset2=int.Parse(ds.Tables[0].Rows[0]["bloom_offset2"].ToString());
+				}
 				return model;
 			}
 			else
@@ -146,7 +164,7 @@ namespace CRDB.DAL
 		public DataSet GetList(string strWhere)
 		{
 			StringBuilder strSql=new StringBuilder();
-			strSql.Append("select id,article_link,article_title,article_content,article_time ");
+			strSql.Append("select id,article_link,article_title,article_content,article_time,bloom_offset1,bloom_offset2 ");
 			strSql.Append(" FROM crdb_article ");
 			if(strWhere.Trim()!="")
 			{
