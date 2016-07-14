@@ -152,6 +152,40 @@ namespace CRDB.DAL
 			}
 		}
 
+        public CRDB.Model.crdb_rsssource GetOneTask(string strWhere)
+		{
+			StringBuilder strSql=new StringBuilder();
+			strSql.Append("select id,site_name,site_code,site_url,article_url_pattern,article_url_range,gather_interval ");
+			strSql.Append(" FROM crdb_rsssource ");
+			if(strWhere.Trim()!="")
+			{
+				strSql.Append(" where "+strWhere);
+			}
+            strSql.Append(" order by gather_interval asc limit 0, 1");
+            DataSet ds = DbHelperMySQL.Query(strSql.ToString());
+            CRDB.Model.crdb_rsssource model = new CRDB.Model.crdb_rsssource();
+            if (ds.Tables[0].Rows.Count > 0)
+            {
+                if (ds.Tables[0].Rows[0]["id"].ToString() != "")
+                {
+                    model.id = int.Parse(ds.Tables[0].Rows[0]["id"].ToString());
+                }
+                model.site_name = ds.Tables[0].Rows[0]["site_name"].ToString();
+                model.site_code = ds.Tables[0].Rows[0]["site_code"].ToString();
+                model.site_url = ds.Tables[0].Rows[0]["site_url"].ToString();
+                model.article_url_pattern = ds.Tables[0].Rows[0]["article_url_pattern"].ToString();
+                model.article_url_range = ds.Tables[0].Rows[0]["article_url_range"].ToString();
+                if (ds.Tables[0].Rows[0]["gather_interval"].ToString() != "")
+                {
+                    model.gather_interval = int.Parse(ds.Tables[0].Rows[0]["gather_interval"].ToString());
+                }
+                return model;
+            }
+            else
+            {
+                return null;
+            }
+		}
 		/// <summary>
 		/// 获得数据列表
 		/// </summary>
