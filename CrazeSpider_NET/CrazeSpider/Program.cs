@@ -27,7 +27,7 @@ namespace CrazeSpider
     }
     class Program
     {
-        static CRDB.BLL.crdb_rsssource m_bll = new CRDB.BLL.crdb_rsssource();
+       
         private static System.Timers.Timer m_timerGetLinks = new System.Timers.Timer();
         private static System.Timers.Timer m_timerGetArticle = new System.Timers.Timer(); 
         private static HtmlAgilityPack.HtmlDocument GetHtmlDocument(string strPage)
@@ -72,25 +72,25 @@ namespace CrazeSpider
         }
         protected static void SaveUrlToDB(string strUrl, string strLinkText)
         {
-            CRDB.BLL.crdb_article m_bll = new CRDB.BLL.crdb_article();
+           
             BloomFilter m_bf = new BloomFilter(10485760);
             int[] nArrayOffset = new int[2];
             nArrayOffset = m_bf.getOffset(strUrl);
-            DataSet dsTemps = m_bll.GetList("bloom_offset1 = '" + nArrayOffset[0].ToString() + "'"
-                                                            + " and bloom_offset2 = '" + nArrayOffset[1].ToString() + "'");
-            //去重
-            if (dsTemps.Tables.Count > 0 && dsTemps.Tables[0].Rows.Count > 0)
-            {
-                Console.WriteLine(strUrl+"has in db");
-                return;
-            }
+            //DataSet dsTemps = m_bll.GetList("bloom_offset1 = '" + nArrayOffset[0].ToString() + "'"
+            //                                                + " and bloom_offset2 = '" + nArrayOffset[1].ToString() + "'");
+            ////去重
+            //if (dsTemps.Tables.Count > 0 && dsTemps.Tables[0].Rows.Count > 0)
+            //{
+            //    Console.WriteLine(strUrl+"has in db");
+            //    return;
+            //}
 
-            CRDB.Model.crdb_article modelArticle = new CRDB.Model.crdb_article();
+            //CRDB.Model.crdb_article modelArticle = new CRDB.Model.crdb_article();
     
-            modelArticle.article_content = "";
-            modelArticle.article_time = int.Parse(GenerateTimeStamp(System.DateTime.Now));
+            //modelArticle.article_content = "";
+            //modelArticle.article_time = int.Parse(GenerateTimeStamp(System.DateTime.Now));
            
-            modelArticle.article_link = "";
+            //modelArticle.article_link = "";
     
             string strTitle = "";
             if (!string.IsNullOrEmpty(strLinkText))
@@ -108,88 +108,88 @@ namespace CrazeSpider
             if (strTitle.Length > 35)
                 strTitle = strTitle.Substring(0, 35);
 
-            modelArticle.article_title = strTitle;
-            modelArticle.bloom_offset1 = nArrayOffset[0];
-            modelArticle.bloom_offset2 = nArrayOffset[1];
+            //modelArticle.article_title = strTitle;
+            //modelArticle.bloom_offset1 = nArrayOffset[0];
+            //modelArticle.bloom_offset2 = nArrayOffset[1];
 
-            m_bll.Add(modelArticle);
+            //m_bll.Add(modelArticle);
             return;
 
         }
-        private static void GetSiteLinks(CRDB.Model.crdb_rsssource model, string strContent)
-        {
-            string strUrlRule = model.article_url_pattern; ;
-            strUrlRule = strUrlRule.Replace(".", "\\.");
-            strUrlRule = strUrlRule.Replace("*", ".*?");
+        //private static void GetSiteLinks(CRDB.Model.crdb_rsssource model, string strContent)
+        //{
+        //    string strUrlRule = model.article_url_pattern; ;
+        //    strUrlRule = strUrlRule.Replace(".", "\\.");
+        //    strUrlRule = strUrlRule.Replace("*", ".*?");
             
-            HtmlAgilityPack.HtmlDocument htmlDoc = GetHtmlDocument(strContent);
+        //    HtmlAgilityPack.HtmlDocument htmlDoc = GetHtmlDocument(strContent);
 
-            if (model.article_url_range != "")
-            {
-                IEnumerable<HtmlNode> NodesUrlContent = htmlDoc.DocumentNode.QuerySelectorAll(model.article_url_range);
-                if (NodesUrlContent.Count() > 0)
-                {
-                    string strReturnPage = NodesUrlContent.ToArray()[0].InnerHtml;//进一步缩小范围
-                    htmlDoc = GetHtmlDocument(strReturnPage);
-                }
-            }
+        //    if (model.article_url_range != "")
+        //    {
+        //        IEnumerable<HtmlNode> NodesUrlContent = htmlDoc.DocumentNode.QuerySelectorAll(model.article_url_range);
+        //        if (NodesUrlContent.Count() > 0)
+        //        {
+        //            string strReturnPage = NodesUrlContent.ToArray()[0].InnerHtml;//进一步缩小范围
+        //            htmlDoc = GetHtmlDocument(strReturnPage);
+        //        }
+        //    }
 
-            string baseUrl = GetUrlLeftPart(model.site_url);
-            DocumentWithLinks links = htmlDoc.GetLinks();
+        //    string baseUrl = GetUrlLeftPart(model.site_url);
+        //    DocumentWithLinks links = htmlDoc.GetLinks();
 
   
 
 
-            foreach (string link in links.Links.Union(links.References))
-            {
+        //    foreach (string link in links.Links.Union(links.References))
+        //    {
 
-                if (string.IsNullOrEmpty(link))
-                {
-                    continue;
-                }
-
-
-                string decodedLink = link;
-
-                string normalizedLink = GetNormalizedLink(baseUrl, decodedLink);
+        //        if (string.IsNullOrEmpty(link))
+        //        {
+        //            continue;
+        //        }
 
 
-                if (string.IsNullOrEmpty(normalizedLink))
-                {
-                    continue;
-                }
+        //        string decodedLink = link;
 
-                MatchCollection matchs = Regex.Matches(normalizedLink, strUrlRule, RegexOptions.Singleline);
-                if (matchs.Count > 0)
-                {
-                    string strLinkText = "";
+        //        string normalizedLink = GetNormalizedLink(baseUrl, decodedLink);
 
-                    foreach (string strTemp in links.m_dicLink2Text.Keys)
-                    {
-                        if (strTemp.Contains(normalizedLink))
-                        {
-                            strLinkText = links.m_dicLink2Text[strTemp];
-                            break;
-                        }
-                    }
 
-                    if (strLinkText == "")
-                    {
-                        if (links.m_dicLink2Text.Keys.Contains(link))
-                            strLinkText = links.m_dicLink2Text[link].TrimEnd().TrimStart();
-                        if (links.m_dicLink2Text.Keys.Contains(link.ToLower()))
-                            strLinkText = links.m_dicLink2Text[link.ToLower()].TrimEnd().TrimStart();
-                    }
-                    SaveUrlToDB(normalizedLink, strLinkText);
-                    Console.WriteLine(normalizedLink);
+        //        if (string.IsNullOrEmpty(normalizedLink))
+        //        {
+        //            continue;
+        //        }
+
+        //        MatchCollection matchs = Regex.Matches(normalizedLink, strUrlRule, RegexOptions.Singleline);
+        //        if (matchs.Count > 0)
+        //        {
+        //            string strLinkText = "";
+
+        //            foreach (string strTemp in links.m_dicLink2Text.Keys)
+        //            {
+        //                if (strTemp.Contains(normalizedLink))
+        //                {
+        //                    strLinkText = links.m_dicLink2Text[strTemp];
+        //                    break;
+        //                }
+        //            }
+
+        //            if (strLinkText == "")
+        //            {
+        //                if (links.m_dicLink2Text.Keys.Contains(link))
+        //                    strLinkText = links.m_dicLink2Text[link].TrimEnd().TrimStart();
+        //                if (links.m_dicLink2Text.Keys.Contains(link.ToLower()))
+        //                    strLinkText = links.m_dicLink2Text[link.ToLower()].TrimEnd().TrimStart();
+        //            }
+        //            SaveUrlToDB(normalizedLink, strLinkText);
+        //            Console.WriteLine(normalizedLink);
       
 
-                }
+        //        }
 
-            }
-            return;
+        //    }
+        //    return;
 
-        }
+        //}
 
         protected static string GetPageContent(string strMainContentElementRules, string strReturnPage)
         {
@@ -264,12 +264,12 @@ namespace CrazeSpider
 
         public static void timerGetLinks_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            CRDB.BLL.crdb_rsssource m_bll = new CRDB.BLL.crdb_rsssource();
-            CRDB.Model.crdb_rsssource model = m_bll.GetOneTask("");
+            //CRDB.BLL.crdb_rsssource m_bll = new CRDB.BLL.crdb_rsssource();
+            //CRDB.Model.crdb_rsssource model = m_bll.GetOneTask("");
             WebDownloader wd = new WebDownloader();
             Encoding ec = Encoding.GetEncoding("UTF-8");
-            string strContent = wd.GetPageByHttpWebRequest(model.site_url, ec, "");
-            GetSiteLinks(model, strContent);
+            //string strContent = wd.GetPageByHttpWebRequest(model.site_url, ec, "");
+            //GetSiteLinks(model, strContent);
 
             Console.WriteLine("timerGetLinks_Elapsed");
         }
