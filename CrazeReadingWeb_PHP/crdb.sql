@@ -34,4 +34,4 @@ CREATE TABLE IF NOT EXISTS `crdb_article` (
 ) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8;
 
 INSERT INTO `crdb_rsssource` (`site_name`, `site_code`, `site_url`, `article_url_pattern`, `article_url_range`, `gather_interval`) VALUES
-('博客园首页', 'utf-8', 'http://www.cnblogs.com/', 'http://www.cnblogs.com/*/p/*.html', 'div#post_list','10')
+('博客园首页', 'utf-8', 'http://www.cnblogs.com/', 'http://www.cnblogs.com/*/p/*.html$', 'div#post_list','10')
