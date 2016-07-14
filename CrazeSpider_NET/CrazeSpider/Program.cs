@@ -31,6 +31,7 @@ namespace CrazeSpider
     class Program
     {
         private static string strApiUrl = "http://localhost:808";
+        private static Dictionary<string, string> m_dicSiteRules = new Dictionary<string, string>();
         private static System.Timers.Timer m_timerGetLinks = new System.Timers.Timer();
         private static System.Timers.Timer m_timerGetArticle = new System.Timers.Timer(); 
         private static HtmlAgilityPack.HtmlDocument GetHtmlDocument(string strPage)
@@ -73,20 +74,42 @@ namespace CrazeSpider
             TimeSpan ts = dt.ToUniversalTime() - new DateTime(1970, 1, 1, 0, 0, 0, 0);
             return Convert.ToInt64(ts.TotalSeconds).ToString();
         }
+
+        public static int IsLinkExist(int nOffset1, int nOffset2)
+        {
+            string loginUrl = strApiUrl + "/index.php/api/index/is_link_exist";
+
+            RssSource rs = new RssSource();
+            Encoding encoding = Encoding.GetEncoding("utf-8");
+
+            IDictionary<string, string> parameters = new Dictionary<string, string>();
+
+            parameters.Add("offset1", nOffset1.ToString());
+            parameters.Add("offset2", nOffset2.ToString());
+
+            HttpWebResponse response = HttpWebResponseUtility.CreatePostHttpResponse(loginUrl, parameters, null, null, encoding, null);
+            StreamReader reader = new StreamReader(response.GetResponseStream(), encoding);
+
+
+
+            string result = reader.ReadToEnd();
+            JObject jo = JObject.Parse(result);
+            string[] values = jo.Properties().Select(item => item.Value.ToString()).ToArray();
+
+
+            return int.Parse(values[1]);
+            //Console.WriteLine("timerGetLinks_Elapsed");
+        }
         protected static void SaveUrlToDB(string strUrl, string strLinkText)
         {
            
             BloomFilter m_bf = new BloomFilter(10485760);
             int[] nArrayOffset = new int[2];
             nArrayOffset = m_bf.getOffset(strUrl);
-            //DataSet dsTemps = m_bll.GetList("bloom_offset1 = '" + nArrayOffset[0].ToString() + "'"
-            //                                                + " and bloom_offset2 = '" + nArrayOffset[1].ToString() + "'");
-            ////去重
-            //if (dsTemps.Tables.Count > 0 && dsTemps.Tables[0].Rows.Count > 0)
-            //{
-            //    Console.WriteLine(strUrl+"has in db");
-            //    return;
-            //}
+            int nExist = IsLinkExist(nArrayOffset[0], nArrayOffset[1]);
+            if (nExist > 0)
+                return;
+         
 
             //CRDB.Model.crdb_article modelArticle = new CRDB.Model.crdb_article();
     
@@ -263,6 +286,35 @@ namespace CrazeSpider
                 return source;
             }
         }
+        public static void GetAllRules()
+        {
+            string loginUrl = strApiUrl + "/index.php/api/index/get_all_rules";
+
+            RssSource rs = new RssSource();
+            Encoding encoding = Encoding.GetEncoding("utf-8");
+
+            IDictionary<string, string> parameters = new Dictionary<string, string>();
+
+
+            HttpWebResponse response = HttpWebResponseUtility.CreatePostHttpResponse(loginUrl, parameters, null, null, encoding, null);
+            StreamReader reader = new StreamReader(response.GetResponseStream(), encoding);
+
+
+
+            string result = reader.ReadToEnd();
+            JObject jo = JObject.Parse(result);
+            string[] values = jo.Properties().Select(item => item.Value.ToString()).ToArray();
+            JArray ja = (JArray)JsonConvert.DeserializeObject(values[3]);
+            foreach (JToken jt in ja)
+            {
+                string strArticle_url_pattern = jt["article_url_pattern"].ToString();
+                string strArticle_content_csspath = jt["article_content_csspath"].ToString();
+                m_dicSiteRules.Add(strArticle_url_pattern, strArticle_content_csspath);
+            }
+
+            return;
+            //Console.WriteLine("timerGetLinks_Elapsed");
+        }
         public static RssSource GetOneTask()
         {
             string loginUrl = strApiUrl + "/index.php/api/index/get_one_task";
@@ -313,6 +365,7 @@ namespace CrazeSpider
         static void Main(string[] args)
         {
             //GetOneTask();
+            GetAllRules();
 
             m_timerGetLinks.Interval = 5000;
             m_timerGetLinks.Enabled = true;
