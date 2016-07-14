@@ -84,7 +84,7 @@ namespace CrazeSpider
             string baseUrl = GetUrlLeftPart(model.site_url);
             DocumentWithLinks links = htmlDoc.GetLinks();
 
-            List<string> lstRevomeSame = new List<string>();
+  
 
 
             foreach (string link in links.Links.Union(links.References))
@@ -129,10 +129,7 @@ namespace CrazeSpider
                     }
 
                     Console.WriteLine(normalizedLink);
-                    if (lstRevomeSame.Contains(normalizedLink))
-                        continue;
-                    else
-                        lstRevomeSame.Add(normalizedLink);
+      
 
                 }
 
