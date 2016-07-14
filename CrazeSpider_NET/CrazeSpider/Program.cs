@@ -28,6 +28,28 @@ namespace CrazeSpider
         public string strArticleUrlPattern;
         public string strArticleContentCssPath;
     }
+    public abstract class BaseModel
+    {
+        /// <summary>
+        /// 将Model对象转换为json字符串
+        /// </summary>
+        /// <returns>返回json字符串</returns>
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
+    }
+
+    [Serializable]
+    public class Article : BaseModel
+    {
+        public string article_link;
+        public string article_title;
+        public string article_content;
+        public int article_time;
+        public int bloom_offset1;
+        public int bloom_offset2;
+    }
     class Program
     {
         private static string strApiUrl = "http://localhost:808";
@@ -109,14 +131,14 @@ namespace CrazeSpider
             int nExist = IsLinkExist(nArrayOffset[0], nArrayOffset[1]);
             if (nExist > 0)
                 return;
-         
 
-            //CRDB.Model.crdb_article modelArticle = new CRDB.Model.crdb_article();
+
+            Article modelArticle = new Article();
     
-            //modelArticle.article_content = "";
-            //modelArticle.article_time = int.Parse(GenerateTimeStamp(System.DateTime.Now));
-           
-            //modelArticle.article_link = "";
+            modelArticle.article_content = "";
+            modelArticle.article_time = int.Parse(GenerateTimeStamp(System.DateTime.Now));
+
+            modelArticle.article_link = strUrl;
     
             string strTitle = "";
             if (!string.IsNullOrEmpty(strLinkText))
@@ -134,13 +156,33 @@ namespace CrazeSpider
             if (strTitle.Length > 35)
                 strTitle = strTitle.Substring(0, 35);
 
-            //modelArticle.article_title = strTitle;
-            //modelArticle.bloom_offset1 = nArrayOffset[0];
-            //modelArticle.bloom_offset2 = nArrayOffset[1];
+            modelArticle.article_title = strTitle;
+            modelArticle.bloom_offset1 = nArrayOffset[0];
+            modelArticle.bloom_offset2 = nArrayOffset[1];
 
+            AddArticle(modelArticle.ToString());
             //m_bll.Add(modelArticle);
             return;
 
+        }
+        public static void AddArticle(string strContent)
+        {
+            string loginUrl = strApiUrl + "/index.php/api/index/add_article";
+
+            RssSource rs = new RssSource();
+            Encoding encoding = Encoding.GetEncoding("utf-8");
+
+            IDictionary<string, string> parameters = new Dictionary<string, string>();
+
+            parameters.Add("article_content", strContent.ToString());
+           
+
+            HttpWebResponse response = HttpWebResponseUtility.CreatePostHttpResponse(loginUrl, parameters, null, null, encoding, null);
+            StreamReader reader = new StreamReader(response.GetResponseStream(), encoding);
+
+
+            return;
+            //Console.WriteLine("timerGetLinks_Elapsed");
         }
         private static void GetSiteLinks(RssSource rs, string strContent)
         {
