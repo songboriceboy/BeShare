@@ -63,17 +63,17 @@ namespace CrazeSpider
             else
                 return new Uri(strPath).GetLeftPart(UriPartial.Authority);
         }
-        private static void GetSiteLinks(RssSource rs, string strContent)
+        private static void GetSiteLinks(CRDB.Model.crdb_rsssource model, string strContent)
         {
-            string strUrlRule = rs.strArticleUrlPattern;;
+            string strUrlRule = model.article_url_pattern; ;
             strUrlRule = strUrlRule.Replace(".", "\\.");
             strUrlRule = strUrlRule.Replace("*", ".*?");
             
             HtmlAgilityPack.HtmlDocument htmlDoc = GetHtmlDocument(strContent);
 
-            if (rs.strArticleUrlRangeCssPath != "")
+            if (model.article_url_range != "")
             {
-                IEnumerable<HtmlNode> NodesUrlContent = htmlDoc.DocumentNode.QuerySelectorAll(rs.strArticleUrlRangeCssPath);
+                IEnumerable<HtmlNode> NodesUrlContent = htmlDoc.DocumentNode.QuerySelectorAll(model.article_url_range);
                 if (NodesUrlContent.Count() > 0)
                 {
                     string strReturnPage = NodesUrlContent.ToArray()[0].InnerHtml;//进一步缩小范围
@@ -81,7 +81,7 @@ namespace CrazeSpider
                 }
             }
 
-            string baseUrl = GetUrlLeftPart(rs.strSiteUrl);
+            string baseUrl = GetUrlLeftPart(model.site_url);
             DocumentWithLinks links = htmlDoc.GetLinks();
 
             List<string> lstRevomeSame = new List<string>();
@@ -214,13 +214,19 @@ namespace CrazeSpider
 
         public static void timerGetLinks_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            CRDB.Model.crdb_rsssource model = m_bll.GetOneTask("");
+            WebDownloader wd = new WebDownloader();
+            Encoding ec = Encoding.GetEncoding("UTF-8");
+            string strContent = wd.GetPageByHttpWebRequest(model.site_url, ec, "");
+            GetSiteLinks(model, strContent);
+
             Console.WriteLine("timerGetLinks_Elapsed");
         }
         public static void timerGetArticle_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             Console.WriteLine("timerGetArticle_Elapsed");
         } 
-
+        
         static void Main(string[] args)
         {
             m_timerGetLinks.Interval = 20000;
@@ -231,16 +237,16 @@ namespace CrazeSpider
             m_timerGetArticle.Enabled = true;
             m_timerGetArticle.Elapsed += new System.Timers.ElapsedEventHandler(timerGetArticle_Elapsed); 
            
-            DataSet ds = m_bll.GetAllList();
-            RssSource rs = new RssSource();
-            rs.strSiteUrl = "http://www.cnblogs.com/";
-            rs.strArticleUrlPattern = "www.cnblogs.com/*/p/*.html$";
-            rs.strArticleUrlRangeCssPath = "div#post_list";
+    
+            //RssSource rs = new RssSource();
+            //rs.strSiteUrl = "http://www.cnblogs.com/";
+            //rs.strArticleUrlPattern = "www.cnblogs.com/*/p/*.html$";
+            //rs.strArticleUrlRangeCssPath = "div#post_list";
           
             WebDownloader wd = new WebDownloader();
             Encoding ec = Encoding.GetEncoding("UTF-8");
-            string strContent = wd.GetPageByHttpWebRequest(rs.strSiteUrl, ec, "");
-            GetSiteLinks(rs, strContent);
+            //string strContent = wd.GetPageByHttpWebRequest(rs.strSiteUrl, ec, "");
+            //GetSiteLinks(rs, strContent);
 
 
             ContentGatherRule cgr = new ContentGatherRule();
