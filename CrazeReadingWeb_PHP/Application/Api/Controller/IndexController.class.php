@@ -73,6 +73,7 @@ class IndexController extends Controller {
     }
     public function add_article()
     {
+        //这里还应该做一下排重，2个offset应该传过来
         if(IS_POST){
             $article_content = I('post.article_content');
 
