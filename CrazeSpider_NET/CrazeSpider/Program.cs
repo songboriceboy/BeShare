@@ -26,7 +26,7 @@ namespace CrazeSpider
     }
     class Program
     {
-        private static CRDB.BLL.crdb_rsssource m_bll = new CRDB.BLL.crdb_rsssource();
+
         private static System.Timers.Timer m_timerGetLinks = new System.Timers.Timer();
         private static System.Timers.Timer m_timerGetArticle = new System.Timers.Timer(); 
         private static HtmlAgilityPack.HtmlDocument GetHtmlDocument(string strPage)
@@ -62,6 +62,58 @@ namespace CrazeSpider
             }
             else
                 return new Uri(strPath).GetLeftPart(UriPartial.Authority);
+        }
+        public static string GenerateTimeStamp(DateTime dt)
+        {
+            // Default implementation of UNIX time of the current UTC time  
+            TimeSpan ts = dt.ToUniversalTime() - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            return Convert.ToInt64(ts.TotalSeconds).ToString();
+        }
+        protected static void SaveUrlToDB(string strUrl, string strLinkText)
+        {
+            CRDB.BLL.crdb_article m_bll = new CRDB.BLL.crdb_article();
+            BloomFilter m_bf = new BloomFilter(10485760);
+            int[] nArrayOffset = new int[2];
+            nArrayOffset = m_bf.getOffset(strUrl);
+            DataSet dsTemps = m_bll.GetList("bloom_offset1 = '" + nArrayOffset[0].ToString() + "'"
+                                                            + " and bloom_offset2 = '" + nArrayOffset[1].ToString() + "'");
+            //去重
+            if (dsTemps.Tables.Count > 0 && dsTemps.Tables[0].Rows.Count > 0)
+            {
+                Console.WriteLine(strUrl+"has in db");
+                return;
+            }
+
+            CRDB.Model.crdb_article modelArticle = new CRDB.Model.crdb_article();
+    
+            modelArticle.article_content = "";
+            modelArticle.article_time = int.Parse(GenerateTimeStamp(System.DateTime.Now));
+           
+            modelArticle.article_link = strUrl;
+    
+            string strTitle = "";
+            if (!string.IsNullOrEmpty(strLinkText))
+            {
+                strTitle = Regex.Replace(strLinkText, @"[|•/\;.':*?<>-]", "").ToString();
+                strTitle = Regex.Replace(strTitle, "[\"]", "").ToString();
+                strTitle = Regex.Replace(strTitle, @"\s", "");
+                strTitle = strTitle.RemovePathInvalidChars().RemoveFileNameInvalidChars();
+            }
+
+            if (strTitle == "")
+            {
+                strTitle = System.Guid.NewGuid().ToString().Replace("-", "");
+            }
+            if (strTitle.Length > 35)
+                strTitle = strTitle.Substring(0, 35);
+
+            modelArticle.article_title = strTitle;
+            modelArticle.bloom_offset1 = nArrayOffset[0];
+            modelArticle.bloom_offset2 = nArrayOffset[1];
+
+            m_bll.Add(modelArticle);
+            return;
+
         }
         private static void GetSiteLinks(CRDB.Model.crdb_rsssource model, string strContent)
         {
@@ -127,7 +179,7 @@ namespace CrazeSpider
                         if (links.m_dicLink2Text.Keys.Contains(link.ToLower()))
                             strLinkText = links.m_dicLink2Text[link.ToLower()].TrimEnd().TrimStart();
                     }
-
+                    SaveUrlToDB(normalizedLink, strLinkText);
                     Console.WriteLine(normalizedLink);
       
 
@@ -211,6 +263,7 @@ namespace CrazeSpider
 
         public static void timerGetLinks_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            CRDB.BLL.crdb_rsssource m_bll = new CRDB.BLL.crdb_rsssource();
             CRDB.Model.crdb_rsssource model = m_bll.GetOneTask("");
             WebDownloader wd = new WebDownloader();
             Encoding ec = Encoding.GetEncoding("UTF-8");
