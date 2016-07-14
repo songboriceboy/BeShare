@@ -1,0 +1,41 @@
+[ 2016-07-12T16:12:58+08:00 ] ::1 /index.php/api/index/user_login
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000052s ]
+INFO: [ app_init ] --END-- [ RunTime:0.000602s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.000583s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.000826s ]
+INFO: [ app_end ] --START--
+INFO: Run Behavior\ShowPageTraceBehavior [ RunTime:0.001005s ]
+INFO: [ app_end ] --END-- [ RunTime:0.001283s ]
+
+[ 2016-07-12T16:25:40+08:00 ] ::1 /index.php/api/index/user_login
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000040s ]
+INFO: [ app_init ] --END-- [ RunTime:0.000481s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.000531s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.000699s ]
+ERR: 1146:Table 'nbadb.nbadb_nbadb_user' doesn't exist
+ [ SQL语句 ] : SHOW COLUMNS FROM `nbadb_nbadb_user`
+
+[ 2016-07-12T16:25:58+08:00 ] ::1 /index.php/api/index/user_login
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000046s ]
+INFO: [ app_init ] --END-- [ RunTime:0.000553s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.000459s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.000626s ]
+SQL: SHOW COLUMNS FROM `nbadb_user` [ RunTime:0.0045s ]
+SQL: SELECT * FROM `nbadb_user` WHERE `username` = 'admin' AND `password` = '123'  [ RunTime:0.0005s ]
+
+[ 2016-07-12T16:26:12+08:00 ] ::1 /index.php/api/index/user_login
+INFO: [ app_init ] --START--
+INFO: Run Behavior\BuildLiteBehavior [ RunTime:0.000048s ]
+INFO: [ app_init ] --END-- [ RunTime:0.000552s ]
+INFO: [ app_begin ] --START--
+INFO: Run Behavior\ReadHtmlCacheBehavior [ RunTime:0.000705s ]
+INFO: [ app_begin ] --END-- [ RunTime:0.000968s ]
+SQL: SHOW COLUMNS FROM `nbadb_user` [ RunTime:0.0048s ]
+SQL: SELECT * FROM `nbadb_user` WHERE `username` = 'admin' AND `password` = '1230'  [ RunTime:0.0004s ]
+
