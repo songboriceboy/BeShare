@@ -21,7 +21,22 @@ class IndexController extends Controller {
             }
         }
     }
-
+    public function get_one_link()
+    {
+        if(IS_POST){
+            $list = M('')->Query("select id,article_link from crdb_article where article_content is null or article_content = '' order by article_time asc limit 0, 1");
+            if(count($list) > 0)
+            {
+                $info = array('response'=>'get_one_link','code'=>0,'msg'=>'成功','data'=>$list);
+                echo json_encode($info);exit;
+            }
+            else
+            {
+                $info = array('response'=>'get_one_link','code'=>1,'msg'=>'失败','data'=>array());
+                echo json_encode($info);exit;
+            }
+        }
+    }
     public function get_all_rules()
     {
         if(IS_POST){
@@ -76,6 +91,13 @@ class IndexController extends Controller {
         }
     }
 
-
+    public function update_article_content()
+    {
+        if(IS_POST){
+            $w['id'] = I('post.id');
+            $data['article_content'] = I('post.content');
+            M('article')->where($w)->save($data);
+        }
+    }
 
 }
