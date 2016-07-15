@@ -27,6 +27,9 @@ class IndexController extends Controller {
             $list = M('')->Query("select id,article_link from crdb_article where article_content is null or article_content = '' order by article_time asc limit 0, 1");
             if(count($list) > 0)
             {
+                $w['id'] = $list[0]['id'];
+                $data['is_visit'] = 1;
+                M('article')->where($w)->save($data);
                 $info = array('response'=>'get_one_link','code'=>0,'msg'=>'成功','data'=>$list);
                 echo json_encode($info);exit;
             }
