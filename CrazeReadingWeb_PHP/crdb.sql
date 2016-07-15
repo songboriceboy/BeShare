@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS `crdb_article` (
   `article_time` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '文章日期',
   `bloom_offset1` int(32) unsigned NOT NULL DEFAULT '0' COMMENT '去重偏移',
   `bloom_offset2` int(32) unsigned NOT NULL DEFAULT '0' COMMENT '去重偏移',
+  `is_visit` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '是否已访问过',
   PRIMARY KEY (`id`)  
 ) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8;
 
