@@ -91,7 +91,16 @@ class IndexController extends Controller {
 
 
             }
-            M('article')->add($data);
+
+            $offset1 = $data['bloom_offset1'];
+            $offset2 = $data['bloom_offset2'];
+
+            $list = M('')->Query("select * from crdb_article where bloom_offset1 = '%s' and bloom_offset2 = '%s'", $offset1, $offset2);
+            if(count($list) == 0)
+            {
+                M('article')->add($data);
+            }
+
         }
     }
 
